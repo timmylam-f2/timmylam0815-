@@ -1,0 +1,108 @@
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>多項式展開練習器</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.js"></script>
+  <style>
+    body {
+      font-family: "Microsoft JhengHei", sans-serif;
+      padding: 40px;
+      background: #f7f7f7;
+    }
+    h1 {
+      text-align: center;
+    }
+    #question {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    input[type=text] {
+      font-size: 20px;
+      width: 80%;
+      padding: 10px;
+    }
+    button {
+      font-size: 20px;
+      padding: 10px 20px;
+      margin: 10px;
+    }
+    #feedback {
+      font-size: 22px;
+      margin-top: 20px;
+    }
+    #score {
+      font-size: 22px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>多項式展開練習器</h1>
+  <div id="question"></div>
+  <input type="text" id="answer" placeholder="請輸入展開後的式子（如 2*x^2 + 3*x - 1）">
+  <br>
+  <button onclick="check()">送出</button>
+  <button onclick="next()">下一題</button>
+  <div id="feedback"></div>
+  <div id="score">得分：0 / 0</div>
+
+  <script>
+    let score = 0, total = 0;
+    let currentExpr = "";
+    let currentText = "";
+
+    function generate() {
+      const choice = Math.floor(Math.random() * 3) + 1;
+      const a = rand(1, 10), b = rand(-10, 10), c = rand(1, 10), d = rand(-10, 10);
+      let expr, text;
+      if (choice === 1) {
+        expr = `(${a}*x + ${b}) * (${c}*x + ${d})`;
+        text = `(${a}x ${b >= 0 ? '+' : '-'} ${Math.abs(b)}) (${c}x ${d >= 0 ? '+' : '-'} ${Math.abs(d)})`;
+      } else if (choice === 2) {
+        const e = rand(1, 10), f = rand(1, 10), g = rand(1, 10);
+        expr = `(${a}*x + ${b}) * (${c}*x + ${d}) - ${e}*x*(${f}*x + ${g})`;
+        text = `(${a}x ${b >= 0 ? '+' : '-'} ${Math.abs(b)}) (${c}x ${d >= 0 ? '+' : '-'} ${Math.abs(d)}) - ${e}x(${f}x ${g >= 0 ? '+' : '-'} ${Math.abs(g)})`;
+      } else {
+        const e = rand(-10, 10);
+        expr = `(${a}*x + ${b}) * (${c}*x^2 + ${d}*x + ${e})`;
+        text = `(${a}x ${b >= 0 ? '+' : '-'} ${Math.abs(b)}) (${c}x² ${d >= 0 ? '+' : '-'} ${Math.abs(d)}x ${e >= 0 ? '+' : '-'} ${Math.abs(e)})`;
+      }
+      return [expr, text];
+    }
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function next() {
+      [currentExpr, currentText] = generate();
+      document.getElementById("question").innerText = "展開：" + currentText;
+      document.getElementById("answer").value = "";
+      document.getElementById("feedback").innerText = "";
+    }
+
+    function check() {
+      total++;
+      const user = document.getElementById("answer").value;
+      try {
+        const correct = math.expand(currentExpr).toString();
+        const userExpanded = math.expand(user).toString();
+        if (userExpanded === correct) {
+          score++;
+          document.getElementById("feedback").innerText = "✅ 正確！";
+          document.getElementById("feedback").style.color = "green";
+        } else {
+          document.getElementById("feedback").innerText = `❌ 錯誤！正確答案：${correct}`;
+          document.getElementById("feedback").style.color = "red";
+        }
+      } catch (e) {
+        document.getElementById("feedback").innerText = "格式錯誤！請用如 2*x^2 + 3*x - 1";
+        document.getElementById("feedback").style.color = "orange";
+      }
+      document.getElementById("score").innerText = `得分：${score} / ${total}`;
+    }
+
+    next();
+  </script>
+</body>
+</html>
